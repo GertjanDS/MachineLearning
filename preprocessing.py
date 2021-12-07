@@ -62,3 +62,18 @@ def load_wisconsin_prepr():
     X = scaler.fit_transform(X)
 
     return X, y, feature_names
+
+
+def load_bikes_prepr():
+    df = pd.read_csv('./datasets/hour.csv')
+    df = df.drop(["instant", "dteday", "casual", "registered"], axis=1)
+
+    # Convert everything to a NumPy array
+    X = df.values[:,:-1]
+    y = df.values[:,-1]
+    feature_names = df.columns[:-1]
+
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)
+
+    return X, y, feature_names
