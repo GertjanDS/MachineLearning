@@ -21,7 +21,7 @@ def PDP(idx, feature_name, model, X, y, categorical=False):
         X_copy = np.copy(X)
         X_copy[:,idx] = value
         predictions = model.predict(X_copy)
-        predictions = classify(predictions) # !!!
+        # predictions = classify(predictions) # !!!
         PDP.append(np.mean(predictions))
 
     # Make a line plot if feature is not categorical and a bar plot if it is categorical
