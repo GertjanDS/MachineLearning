@@ -10,10 +10,9 @@ def load_diabetes_prepr():
     y = diabetes.target
     feature_names = diabetes.feature_names
 
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
+    categorical = [False, True, False, False, False, False, False, False, False, False]
 
-    return X, y, feature_names
+    return X, y, feature_names, categorical
 
 
 def load_loan_prepr():
@@ -44,11 +43,10 @@ def load_loan_prepr():
     y = df.values[:,-1]
     feature_names = df.columns[:-1]
 
-    # Scale data
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
+    # Which features are categorical?
+    categorical = [True, True, True, True, True, False, False, False, False, True, True]
 
-    return X, y, feature_names
+    return X, y, feature_names, categorical
 
 
 def load_wisconsin_prepr():
@@ -58,10 +56,9 @@ def load_wisconsin_prepr():
     y = wisconsin.target
     feature_names = wisconsin.feature_names
 
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
+    categorical = [False] * len(feature_names)
 
-    return X, y, feature_names
+    return X, y, feature_names, categorical
 
 
 def load_bikes_prepr():
@@ -73,7 +70,6 @@ def load_bikes_prepr():
     y = df.values[:,-1]
     feature_names = df.columns[:-1]
 
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
+    categorical = [True, True, True, True, True, True, True, True, False, False, False, False]
 
-    return X, y, feature_names
+    return X, y, feature_names, categorical
