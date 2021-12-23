@@ -17,9 +17,11 @@ def load_diabetes_prepr():
 
 def load_loan_prepr():
     df = pd.read_csv('loan_data_set.csv')
+    print("Original shape: ", df.shape)
 
     # Drop unnecessary feature
     df = df.drop("Loan_ID", axis=1)
+    
 
     # Drop every instance with one or more missing features
     df = df.dropna(axis=0)

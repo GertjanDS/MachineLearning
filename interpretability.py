@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 def classify(output: np.ndarray):
     return (output > 0.5).astype(int)
 
 
-def PDP(idx, feature_name, model, X, y, categorical=False):
+def PDP(mode, idx, feature_name, model, X, y, categorical=False):
 
     # Determine the x-axis of the PDP
     if categorical:
@@ -22,13 +23,20 @@ def PDP(idx, feature_name, model, X, y, categorical=False):
         X_copy = np.copy(X)
         X_copy[:,idx] = value
         predictions = model.predict(X_copy)
-        # predictions = classify(predictions) # !!!
-        PDP.append(np.mean(predictions))
 
+        if mode == "classification":
+            predictions = postproces_pred_class(predictions)
+        elif mode == "regression":
+            predictions = postproces_pred_regr(predictions)
+
+        PDP.append(np.mean(predictions))
+    
+    return values, PDP
+
+    """
     # Make a line plot if feature is not categorical and a bar plot if it is categorical
-    plt.title("PDP of {}".format(feature_name))
     plt.xlabel(feature_name)
-    plt.ylabel("prediction")
+    plt.ylabel("Average prediction")
 
     if not categorical:
         plt.plot(values, PDP)
@@ -38,9 +46,13 @@ def PDP(idx, feature_name, model, X, y, categorical=False):
             plt.ylim(max(min(PDP) - 0.2 * diff, 0.0), max(PDP) + 0.2 * diff)
         else:
             plt.ylim(min(PDP) - 0.001, max(PDP) + 0.001)
-        plt.bar(values, PDP)
+        plt.bar(values, PDP, width=(values[1]-values[0]) * 0.9)
     
     return values, PDP
+    """
+
+def inverse_transform(X, feat_idx, scaler):
+    return X * np.sqrt(scaler.var_[feat_idx]) + scaler.mean_[feat_idx]
 
 
 def postproces_pred_class(y_pred):
@@ -52,7 +64,7 @@ def postproces_pred_regr(y_pred):
     return np.reshape(y_pred, y_pred.shape[0])
 
 
-def generate_counterfactuals(mode, instance, X_train, model, categorical, seed, features_to_vary="all", n_counterfactuals=10, update_time=5000, sample_time=100, limit_varied_features=True, goal_pred=10.0, alpha=1.0, tol=2.0):
+def generate_counterfactuals(mode, instance, X_train, model, categorical, seed, features_to_vary="all", n_counterfactuals=10, total_time=5000, sample_time=100, limit_varied_features=True, goal_pred=None, alpha=1.0, tol=1.0):
 
     assert mode in ("classification", "regression")
 
@@ -81,12 +93,13 @@ def generate_counterfactuals(mode, instance, X_train, model, categorical, seed, 
     counterfactual_losses = np.ones(n_counterfactuals) * 100
 
     update_counter = 0
-    total_counter = 0
+    # total_counter = 0
 
     if features_to_vary=="all":
         features_to_vary = [True] * n_features
 
-    while update_counter < update_time:
+    # while update_counter < update_time:
+    for total_counter in tqdm(range(total_time)):
         counterfactual_found = False
         sample_counter = 0
         prev_instance = np.copy(instance)
@@ -150,10 +163,10 @@ def generate_counterfactuals(mode, instance, X_train, model, categorical, seed, 
                     counterfactuals[idx_to_replace] = new_instance
                     counterfactual_losses[idx_to_replace] = counterfactual_loss
                     
-                    print("---------------------------------------------------------------")
-                    print(f"Counts total: {total_counter}")
-                    print(f"Counts since last update: {update_counter}")
-                    print(f"Counterfactual losses: {counterfactual_losses}")
+                    # print("---------------------------------------------------------------")
+                    # print(f"Counts total: {total_counter}")
+                    # print(f"Counts since last update: {update_counter}")
+                    # print(f"Counterfactual losses: {counterfactual_losses}")
 
                     update_counter = 0
             
@@ -162,14 +175,14 @@ def generate_counterfactuals(mode, instance, X_train, model, categorical, seed, 
             sample_counter += 1
 
         update_counter += 1
-        total_counter += 1
-        if not (total_counter % 1000):
-            print("---------------------------------------------------------------")
-            print(f"Total counts: {total_counter}")
+        # total_counter += 1
+        # if not (total_counter % 1000):
+            # print("---------------------------------------------------------------")
+            # print(f"Total counts: {total_counter}")
 
-    print("---------------------------------------------------------------")
-    print(f"Total counts: {total_counter}")
-    print(f"Counts since last update: {update_counter}")
+    # print("---------------------------------------------------------------")
+    # print(f"Total counts: {total_counter}")
+    # print(f"Counts since last update: {update_counter}")
 
     sort_indices = np.argsort(counterfactual_losses)
     counterfactual_losses = counterfactual_losses[sort_indices]
