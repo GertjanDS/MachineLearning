@@ -1,1 +1,4 @@
+ipywidgets
+dice_ml
 shap==0.40.0
+anchor-exp

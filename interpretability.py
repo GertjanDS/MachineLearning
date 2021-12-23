@@ -4,7 +4,16 @@ from tqdm import tqdm
 
 def classify(output: np.ndarray):
     return (output > 0.5).astype(int)
+    
+def inverse_transform(X, feat_idx, scaler):
+    return X * np.sqrt(scaler.var_[feat_idx]) + scaler.mean_[feat_idx]
 
+def postproces_pred_class(y_pred):
+    y_pred = classify(y_pred)
+    return np.reshape(y_pred, y_pred.shape[0])
+
+def postproces_pred_regr(y_pred):
+    return np.reshape(y_pred, y_pred.shape[0])
 
 def PDP(mode, idx, feature_name, model, X, y, categorical=False):
 
@@ -32,37 +41,6 @@ def PDP(mode, idx, feature_name, model, X, y, categorical=False):
         PDP.append(np.mean(predictions))
     
     return values, PDP
-
-    """
-    # Make a line plot if feature is not categorical and a bar plot if it is categorical
-    plt.xlabel(feature_name)
-    plt.ylabel("Average prediction")
-
-    if not categorical:
-        plt.plot(values, PDP)
-    else:
-        diff = max(PDP) - min(PDP)
-        if diff != 0.0:
-            plt.ylim(max(min(PDP) - 0.2 * diff, 0.0), max(PDP) + 0.2 * diff)
-        else:
-            plt.ylim(min(PDP) - 0.001, max(PDP) + 0.001)
-        plt.bar(values, PDP, width=(values[1]-values[0]) * 0.9)
-    
-    return values, PDP
-    """
-
-def inverse_transform(X, feat_idx, scaler):
-    return X * np.sqrt(scaler.var_[feat_idx]) + scaler.mean_[feat_idx]
-
-
-def postproces_pred_class(y_pred):
-    y_pred = classify(y_pred)
-    return np.reshape(y_pred, y_pred.shape[0])
-
-
-def postproces_pred_regr(y_pred):
-    return np.reshape(y_pred, y_pred.shape[0])
-
 
 def generate_counterfactuals(mode, instance, X_train, model, categorical, seed, features_to_vary="all", n_counterfactuals=10, total_time=5000, sample_time=100, limit_varied_features=True, goal_pred=None, alpha=1.0, tol=1.0):
 

@@ -16,8 +16,7 @@ def load_diabetes_prepr():
 
 
 def load_loan_prepr():
-    df = pd.read_csv('loan_data_set.csv')
-    print("Original shape: ", df.shape)
+    df = pd.read_csv('Datasets/loan_data_set.csv')
 
     # Drop unnecessary feature
     df = df.drop("Loan_ID", axis=1)
@@ -64,7 +63,7 @@ def load_wisconsin_prepr():
 
 
 def load_bikes_prepr():
-    df = pd.read_csv('./datasets/hour.csv')
+    df = pd.read_csv('./Datasets/hour.csv')
     df = df.drop(["instant", "dteday", "casual", "registered"], axis=1)
 
     # Convert everything to a NumPy array
